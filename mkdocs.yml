@@ -29,7 +29,6 @@ theme:
     - search.highlight
     - content.code.copy
     - content.code.annotate
-    - toc.integrate
   icon:
     repo: fontawesome/brands/github
 
@@ -72,27 +71,14 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
-  - Networking:
-    - Overview: networking/index.md
-    - NetBird VPN: networking/netbird.md
-    - Discovery Server: networking/discovery-server.md
-  - Teleoperation:
-    - Overview: teleoperation/index.md
-    - Xbox Controller: teleoperation/xbox-controller.md
-  - Camera (Lucid Vision):
-    - Overview: camera/index.md
-    - Node Parameters: camera/parameters.md
-    - Multi-machine Streaming: camera/streaming.md
-    - Recording: camera/recording.md
-  - LiDAR (Ouster):
-    - Overview: lidar/index.md
-  - Vehicle:
-    - Overview: vehicle/index.md
-    - Vehicle Interface: vehicle/interface.md
-  - Hardware:
-    - Vehicle: hardware/index.md
-    - Sensors: hardware/sensors.md
+  - Networking: networking/index.md
+  - Teleoperation: teleoperation/index.md
+  - Camera (Lucid Vision): camera/index.md
+  - LiDAR (Ouster): lidar/index.md
+  - Vehicle: vehicle/index.md
+  - Hardware: hardware/index.md
   - Configuration: configuration.md
+  - Status & Roadmap: roadmap.md
 
 extra:
   social:

@@ -8,7 +8,7 @@ Todas as variáveis de ambiente são definidas em `.env` (copiar de `env.exemple
 |----------|-----------|--------|
 | `DISPLAY` | Display X11 para janelas gráficas | `:0` |
 | `QT_X11_NO_MITSHM` | Correção para Qt dentro do Docker | `1` |
-| `ROS_DOMAIN_ID` | ID de domínio DDS do ROS2 — deve ser igual em todas as máquinas | `42` |
+| `ROS_DOMAIN_ID` | ID de domínio DDS do ROS2 — deve ser igual em todas as máquinas | `0` |
 
 ## Câmera (Lucid Vision)
 

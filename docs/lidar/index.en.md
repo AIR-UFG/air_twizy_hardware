@@ -6,8 +6,32 @@ Source: [ouster-lidar/ouster-ros](https://github.com/ouster-lidar/ouster-ros) (i
 
 ## Requirements
 
-- Ouster OS-series sensor connected via Ethernet
-- Sensor hostname or IP address known (use `avahi-resolve -n <hostname>.local` for link-local)
+- Ouster OS-series sensor connected via Ethernet to a dedicated interface (e.g. `enp7s0`)
+- Host interface configured with a static IP and DHCP server to assign an address to the sensor
+
+## Network setup (host — run before starting the container)
+
+The Ouster sensor obtains its IP via DHCP. Configure the host interface and start a DHCP server:
+
+```bash
+# Check available interfaces
+ip link show
+
+# Assign static IP to the interface connected to the Ouster
+sudo ip addr flush enp7s0
+sudo ip addr add 10.5.5.1/24 dev enp7s0
+sudo ip link set enp7s0 up
+ip addr show dev enp7s0
+
+# Start DHCP server — assigns IPs in 10.5.5.50–10.5.5.100 to the sensor
+sudo dnsmasq -C /dev/null -kd -F 10.5.5.50,10.5.5.100 -i enp7s0 --bind-dynamic
+```
+
+After the sensor boots it will receive an IP in the `10.5.5.x` range. Verify with:
+
+```bash
+ping 10.5.5.50   # or whichever IP dnsmasq assigned
+```
 
 ## Quick Start
 
@@ -19,8 +43,7 @@ docker compose exec lidar bash
 source /opt/ros/humble/setup.bash
 source install/setup.bash
 
-ros2 launch ouster_ros sensor.composite.launch.xml \
-    sensor_hostname:=<SENSOR_IP_OR_HOSTNAME>
+ros2 launch ouster_ros driver.launch.py
 ```
 
 ## Published Topics

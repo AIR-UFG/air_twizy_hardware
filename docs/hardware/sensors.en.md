@@ -4,6 +4,8 @@
 
 The PCAN-GPS FD module provides IMU and GPS data via the CAN bus, published as ROS2 topics.
 
+![PCAN-GPS FD module](../assets/images/pcan-gps-fd.png)
+
 | Spec | Value |
 |------|-------|
 | Microcontroller | NXP LPC4000 series (ARM Cortex-M4) |
@@ -23,6 +25,12 @@ The PCAN-GPS FD module provides IMU and GPS data via the CAN bus, published as R
 
 - **IMU:** Raw data access successful via CAN bus and ROS2 topics
 - **GPS:** Coordinates not obtained during tests — tests were performed indoors without satellite signal
+
+![PCAN-GPS FD installed on vehicle](../assets/images/pcan-gps-installed.png)
+
+## CAN Bus Architecture
+
+![CAN bus system diagram](../assets/images/can-diagram.png)
 
 ## Lucid Vision TRI032S-CC
 

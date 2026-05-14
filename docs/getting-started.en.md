@@ -36,7 +36,7 @@ Edit `.env` with your machine-specific values. At minimum:
 | Variable | Description | Example |
 |----------|-------------|---------|
 | `CAMERA_SERIAL` | Lucid camera serial number | `12345678` |
-| `ROS_DOMAIN_ID` | Shared ROS2 domain (must match all machines) | `42` |
+| `ROS_DOMAIN_ID` | Shared ROS2 domain (must match all machines) | `0` |
 | `TWIZY_CAN_PORT` | Host CAN interface name | `can0` |
 
 See [Configuration](configuration.md) for the full variable reference.

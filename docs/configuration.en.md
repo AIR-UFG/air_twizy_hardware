@@ -8,7 +8,7 @@ All environment variables are defined in `.env` (copy from `env.exemple`). The r
 |----------|-------------|---------|
 | `DISPLAY` | X11 display for graphical windows | `:0` |
 | `QT_X11_NO_MITSHM` | Fix for Qt inside Docker | `1` |
-| `ROS_DOMAIN_ID` | ROS2 DDS domain ID — must match across all machines | `42` |
+| `ROS_DOMAIN_ID` | ROS2 DDS domain ID — must match across all machines | `0` |
 
 ## Camera (Lucid Vision)
 

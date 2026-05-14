@@ -4,6 +4,8 @@
 
 O módulo PCAN-GPS FD fornece dados de IMU e GPS via barramento CAN, publicados como tópicos ROS2.
 
+![Módulo PCAN-GPS FD](../assets/images/pcan-gps-fd.png)
+
 | Especificação | Valor |
 |--------------|-------|
 | Microcontrolador | NXP LPC4000 series (ARM Cortex-M4) |
@@ -23,6 +25,12 @@ O módulo PCAN-GPS FD fornece dados de IMU e GPS via barramento CAN, publicados 
 
 - **IMU:** Acesso aos dados brutos (raw data) realizado com sucesso via barramento CAN e tópicos ROS2
 - **GPS:** Coordenadas não obtidas nos testes — testes realizados em ambiente fechado (indoor), sem sinal de satélite
+
+![PCAN-GPS FD instalado no veículo](../assets/images/pcan-gps-installed.png)
+
+## Arquitetura do Barramento CAN
+
+![Diagrama do sistema CAN](../assets/images/can-diagram.png)
 
 ## Lucid Vision TRI032S-CC
 

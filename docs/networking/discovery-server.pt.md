@@ -73,15 +73,15 @@ RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 ### Lado do operador
 
 ```bash
-ROS_DISCOVERY_SERVER=<hostname_ou_ip_netbird_do_veiculo>:11811
-ROS_SUPER_CLIENT=true        # desativa multicast, força uso exclusivo do Discovery Server
-ROS_DOMAIN_ID=0
-RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+export ROS_DISCOVERY_SERVER=twizy:11811   # hostname NetBird do veículo
+export ROS_SUPER_CLIENT=true              # desativa multicast, força uso exclusivo do Discovery Server
+export ROS_DOMAIN_ID=0
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 ```
 
 | Variável | Valor | Descrição |
 |----------|-------|-----------|
-| `ROS_DISCOVERY_SERVER` | `hostname:11811` | Hostname ou IP NetBird da máquina com o servidor |
+| `ROS_DISCOVERY_SERVER` | `twizy:11811` | Hostname NetBird (ou IP) do veículo com o servidor |
 | `ROS_DOMAIN_ID` | `0` | Deve ser idêntico em todas as máquinas da rede |
 | `ROS_SUPER_CLIENT` | `true` | Desativa multicast, força uso exclusivo do Discovery Server |
 | `RMW_IMPLEMENTATION` | `rmw_fastrtps_cpp` | Define o FastDDS como middleware ROS2 |
