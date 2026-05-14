@@ -1,0 +1,1764 @@
+
+<!doctype html>
+<html lang="pt" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation for the AIR-UFG Twizy hardware stack — camera, LiDAR and vehicle interface">
+      
+      
+      
+        <link rel="canonical" href="https://air-ufg.github.io/air_twizy_hardware/pt/vehicle/">
+      
+      
+        <link rel="prev" href="../lidar/">
+      
+      
+        <link rel="next" href="../hardware/">
+      
+      
+        
+          <link rel="alternate" href="../../vehicle/" hreflang="en">
+        
+          <link rel="alternate" href="./" hreflang="pt">
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Vehicle - AIR Twizy Hardware</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#veiculo-air-twizy" class="md-skip">
+          Ir para o conteúdo
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabeçalho">
+    <a href="../" title="AIR Twizy Hardware" class="md-header__button md-logo" aria-label="AIR Twizy Hardware" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AIR Twizy Hardware
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Vehicle
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Selecione o idioma">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../vehicle/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="pt" class="md-select__link">
+              Português
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Buscar" placeholder="Buscar" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Pesquisar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpar" aria-label="Limpar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando a pesquisa
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/AIR-UFG/air_twizy_hardware" title="Ir ao repositório" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    AIR-UFG/air_twizy_hardware
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Abas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../getting-started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../networking/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Networking
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../teleoperation/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Teleoperation
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../camera/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Camera (Lucid Vision)
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../lidar/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  LiDAR (Ouster)
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Vehicle
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../hardware/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Hardware
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../configuration/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Configuration
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../roadmap/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Status & Roadmap
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navegação" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../" title="AIR Twizy Hardware" class="md-nav__button md-logo" aria-label="AIR Twizy Hardware" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AIR Twizy Hardware
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/AIR-UFG/air_twizy_hardware" title="Ir ao repositório" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    AIR-UFG/air_twizy_hardware
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../networking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Networking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../teleoperation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Teleoperation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../camera/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Camera (Lucid Vision)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../lidar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LiDAR (Ouster)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vehicle
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vehicle
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#estrutura-do-workspace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Estrutura do Workspace
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inicio-rapido" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Início Rápido
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Início Rápido">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#simulacao-gazebo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Simulação (Gazebo)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#veiculo-real" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Veículo real
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variaveis-de-ambiente" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Variáveis de Ambiente
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gravacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gravação
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pacotes-de-interface-do-veiculo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pacotes de Interface do Veículo
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pacotes de Interface do Veículo">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ros2_socketcan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ros2_socketcan
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sd-vehicleinterface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SD-VehicleInterface
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuracao-do-barramento-can" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuração do Barramento CAN
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operacao-do-veiculo-exemplo-real" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operação do Veículo — Exemplo Real
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Operação do Veículo — Exemplo Real">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ssh-no-veiculo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1 — SSH no veículo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-navegar-ate-o-repositorio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2 — Navegar até o repositório
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-iniciar-os-containers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3 — Iniciar os containers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-entrar-no-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4 — Entrar no container
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-launch-da-interface-do-veiculo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5 — Launch da interface do veículo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interface-can-qual-porta-usar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interface CAN — qual porta usar
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#variaveis-de-ambiente-dentro-do-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Variáveis de ambiente dentro do container
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-teleoperacao-por-teclado-alternativa-ao-controle-xbox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6 — Teleoperação por teclado (alternativa ao controle Xbox)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-parar-os-containers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7 — Parar os containers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hardware/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hardware
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Status & Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#estrutura-do-workspace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Estrutura do Workspace
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inicio-rapido" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Início Rápido
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Início Rápido">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#simulacao-gazebo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Simulação (Gazebo)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#veiculo-real" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Veículo real
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variaveis-de-ambiente" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Variáveis de Ambiente
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gravacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gravação
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pacotes-de-interface-do-veiculo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pacotes de Interface do Veículo
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pacotes de Interface do Veículo">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ros2_socketcan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ros2_socketcan
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sd-vehicleinterface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SD-VehicleInterface
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuracao-do-barramento-can" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuração do Barramento CAN
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operacao-do-veiculo-exemplo-real" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operação do Veículo — Exemplo Real
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Operação do Veículo — Exemplo Real">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ssh-no-veiculo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1 — SSH no veículo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-navegar-ate-o-repositorio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2 — Navegar até o repositório
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-iniciar-os-containers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3 — Iniciar os containers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-entrar-no-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4 — Entrar no container
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-launch-da-interface-do-veiculo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5 — Launch da interface do veículo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interface-can-qual-porta-usar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interface CAN — qual porta usar
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#variaveis-de-ambiente-dentro-do-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Variáveis de ambiente dentro do container
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-teleoperacao-por-teclado-alternativa-ao-controle-xbox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6 — Teleoperação por teclado (alternativa ao controle Xbox)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-parar-os-containers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7 — Parar os containers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="veiculo-air-twizy">Veículo — AIR Twizy<a class="headerlink" href="#veiculo-air-twizy" title="Permanent link">&para;</a></h1>
+<p>Stack ROS2 para o veículo StreetDrone Twizy da equipe AIR-UFG. Este workspace cobre tanto simulação (Gazebo) quanto operação real via barramento CAN.</p>
+<p>Fonte: <a href="https://github.com/AIR-UFG/air_twizy_simulation">AIR-UFG/air_twizy_simulation</a> (incluído como submódulo em <code>workspace/twizy</code>).</p>
+<h2 id="estrutura-do-workspace">Estrutura do Workspace<a class="headerlink" href="#estrutura-do-workspace" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>workspace/twizy/
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── docker/
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│   ├── docker-compose.yml        # Compose standalone do veículo
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│   └── Dockerfile
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>├── ros_packages/
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│   ├── vehicle_interface_packages/
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│   │   ├── ros2_socketcan/       # Interface CAN ROS2
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│   │   └── SD-VehicleInterface/  # Integração XCU StreetDrone
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│   └── vehicle_simulation_packages/
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│       ├── air_description/      # Descrições URDF/mesh
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│       ├── air_sim/              # Mundo Gazebo e plugins
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>│       └── vehicle_control_plugin/
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>└── utils/
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    ├── run.sh                    # Lançador do container com flags de env
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    ├── build_docker.sh
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    ├── bash_container.sh         # Shell no container em execução
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>    └── record_bag.sh
+</code></pre></div>
+<h2 id="inicio-rapido">Início Rápido<a class="headerlink" href="#inicio-rapido" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>carro
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>carro<span class="w"> </span>bash
+</code></pre></div>
+<h3 id="simulacao-gazebo">Simulação (Gazebo)<a class="headerlink" href="#simulacao-gazebo" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Dentro do container</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>./utils/run.sh<span class="w"> </span><span class="nv">GPU</span><span class="o">=</span><span class="nb">false</span><span class="w"> </span><span class="nv">RVIZ</span><span class="o">=</span><span class="nb">false</span>
+</code></pre></div>
+<p>Quando o Gazebo abrir, pressione <strong>Play</strong>. Depois em outro terminal:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker<span class="w"> </span>compose<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>carro<span class="w"> </span>bash
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="c1"># Controle por teclado</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>ros2<span class="w"> </span>run<span class="w"> </span>vehicle_control<span class="w"> </span>sd_teleop_keyboard_control.py
+</code></pre></div>
+<p>Controles:</p>
+<table>
+<thead>
+<tr>
+<th>Tecla</th>
+<th>Ação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>W</td>
+<td>Aumentar velocidade</td>
+</tr>
+<tr>
+<td>S</td>
+<td>Diminuir velocidade</td>
+</tr>
+<tr>
+<td>A</td>
+<td>Virar à esquerda</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Virar à direita</td>
+</tr>
+<tr>
+<td>X</td>
+<td>Parar</td>
+</tr>
+</tbody>
+</table>
+<h3 id="veiculo-real">Veículo real<a class="headerlink" href="#veiculo-real" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Subir interface CAN no host</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>sudo<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span><span class="nb">set</span><span class="w"> </span>can0<span class="w"> </span><span class="nb">type</span><span class="w"> </span>can<span class="w"> </span>bitrate<span class="w"> </span><span class="m">500000</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>sudo<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span><span class="nb">set</span><span class="w"> </span>can0<span class="w"> </span>up
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="c1"># Iniciar container com CAN e interface do veículo habilitados</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="nv">TWIZY_INTERFACE</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span><span class="nv">TWIZY_CAN_PORT</span><span class="o">=</span>can0<span class="w"> </span>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span>-d<span class="w"> </span>carro
+</code></pre></div>
+<h2 id="variaveis-de-ambiente">Variáveis de Ambiente<a class="headerlink" href="#variaveis-de-ambiente" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Variável</th>
+<th>Descrição</th>
+<th>Padrão</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TWIZY_GPU</code></td>
+<td>Habilitar GPU para processamento de nuvem de pontos</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>TWIZY_LIDAR</code></td>
+<td>Lançar integração com LiDAR</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>TWIZY_INTERFACE</code></td>
+<td>Lançar interface do veículo (CAN)</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>TWIZY_CAN_PORT</code></td>
+<td>Nome da interface CAN no host</td>
+<td><code>can0</code></td>
+</tr>
+<tr>
+<td><code>NVIDIA_RUNTIME</code></td>
+<td>Runtime NVIDIA para containers GPU</td>
+<td><code>runc</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="gravacao">Gravação<a class="headerlink" href="#gravacao" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Dentro do container</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="c1"># Gravar tópicos específicos</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>./utils/record_bag.sh<span class="w"> </span>meu_run<span class="w"> </span>specific<span class="w"> </span>/velodyne_points<span class="w"> </span>/camera/image_raw
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="c1"># Gravar todos os tópicos</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>./utils/record_bag.sh<span class="w"> </span>meu_run<span class="w"> </span>all
+</code></pre></div>
+<p>As bags são armazenadas em <code>workspace/twizy/shared_folder/</code> (volume montado do host).</p>
+<hr />
+<h2 id="pacotes-de-interface-do-veiculo">Pacotes de Interface do Veículo<a class="headerlink" href="#pacotes-de-interface-do-veiculo" title="Permanent link">&para;</a></h2>
+<p>O workspace <code>vehicle_interface_packages</code> fornece comunicação ROS2 com o hardware do StreetDrone Twizy via barramento CAN.</p>
+<h3 id="ros2_socketcan">ros2_socketcan<a class="headerlink" href="#ros2_socketcan" title="Permanent link">&para;</a></h3>
+<p>Gerencia a comunicação CAN em ROS2 usando o protocolo SocketCAN.</p>
+<ul>
+<li>Implementa nós ROS2 para interfaceamento com barramento CAN</li>
+<li>Publica/assina mensagens <code>can_msgs/Frame</code></li>
+<li>Suporta o driver SocketCAN padrão do kernel (<code>can0</code>, <code>vcan0</code>, etc.)</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>ros2<span class="w"> </span>launch<span class="w"> </span>ros2_socketcan<span class="w"> </span>socket_can_bridge.launch.xml<span class="w"> </span>interface:<span class="o">=</span>can0
+</code></pre></div>
+<h3 id="sd-vehicleinterface">SD-VehicleInterface<a class="headerlink" href="#sd-vehicleinterface" title="Permanent link">&para;</a></h3>
+<p>Integra o Xenos Control Unit (XCU) da StreetDrone com a stack de navegação ROS2.</p>
+<ul>
+<li>Traduz comandos <code>ackermann_msgs/AckermannDriveStamped</code> para frames CAN</li>
+<li>Publica velocidade do veículo, ângulo de direção e status</li>
+</ul>
+<p><strong>Tópicos assinados:</strong>
+| Tópico | Tipo | Descrição |
+|--------|------|-----------|
+| <code>/sd_control</code> | <code>ackermann_msgs/AckermannDriveStamped</code> | Comandos de condução |</p>
+<p><strong>Tópicos publicados:</strong>
+| Tópico | Tipo | Descrição |
+|--------|------|-----------|
+| <code>/sd_status</code> | custom | Estado do veículo (velocidade, direção, modo) |</p>
+<h3 id="configuracao-do-barramento-can">Configuração do Barramento CAN<a class="headerlink" href="#configuracao-do-barramento-can" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># CAN padrão (500 kbps — padrão StreetDrone)</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>sudo<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span><span class="nb">set</span><span class="w"> </span>can0<span class="w"> </span><span class="nb">type</span><span class="w"> </span>can<span class="w"> </span>bitrate<span class="w"> </span><span class="m">500000</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>sudo<span class="w"> </span>ip<span class="w"> </span>link<span class="w"> </span><span class="nb">set</span><span class="w"> </span>can0<span class="w"> </span>up
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="c1"># Verificar</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>ip<span class="w"> </span>link<span class="w"> </span>show<span class="w"> </span>can0
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>candump<span class="w"> </span>can0<span class="w">  </span><span class="c1"># deve mostrar frames CAN do XCU</span>
+</code></pre></div>
+<hr />
+<h2 id="operacao-do-veiculo-exemplo-real">Operação do Veículo — Exemplo Real<a class="headerlink" href="#operacao-do-veiculo-exemplo-real" title="Permanent link">&para;</a></h2>
+<h3 id="1-ssh-no-veiculo">1 — SSH no veículo<a class="headerlink" href="#1-ssh-no-veiculo" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>ssh<span class="w"> </span>air@twizy
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="c1"># senha: (perguntar à equipe)</span>
+</code></pre></div>
+<p><code>twizy</code> resolve para <code>100.122.121.134</code> via VPN NetBird. <strong>Ambas as máquinas devem estar com o NetBird conectado</strong> antes de tentar (<code>netbird status</code> em cada uma).</p>
+<div class="admonition note">
+<p class="admonition-title">Primeira conexão</p>
+<p>Na primeira vez que um novo computador se conecta, o SSH exibe:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>The authenticity of host &#39;twizy (100.122.121.134)&#39; can&#39;t be established.
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>ED25519 key fingerprint is SHA256:6KA7LU04JZoQ+1IiHqn3uDhkX+sSFLTbj2AMHe+xGgY.
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>Are you sure you want to continue connecting (yes/no/[fingerprint])?
+</code></pre></div>
+Digite <code>yes</code> (não apenas <code>y</code> — o SSH recusa a resposta abreviada). A chave é salva permanentemente.</p>
+</div>
+<hr />
+<h3 id="2-navegar-ate-o-repositorio">2 — Navegar até o repositório<a class="headerlink" href="#2-navegar-ate-o-repositorio" title="Permanent link">&para;</a></h3>
+<p>O repositório fica em <code>~/tmp_mota/air_twizy_simulation/</code> no veículo. Existem diretórios similares para outros membros da equipe (<code>tmp_simoes/</code>, <code>tmp_victor/</code>) — usar o <code>tmp_mota/</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nb">cd</span><span class="w"> </span>~/tmp_mota/air_twizy_simulation
+</code></pre></div>
+<p>Estrutura do repositório neste caminho:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>air_twizy_simulation/
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>├── docker/
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>│   └── docker-compose.yml
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>├── ros_packages/
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>├── shared_folder/
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>└── utils/
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>    ├── run.sh              ← usar este para iniciar/reiniciar containers
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>    ├── bash_container.sh   ← usar este para entrar no container
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>    ├── record_bag.sh
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>    ├── direct_control/
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>    │   └── direct_teleop.py
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>    └── ...
+</code></pre></div>
+<hr />
+<h3 id="3-iniciar-os-containers">3 — Iniciar os containers<a class="headerlink" href="#3-iniciar-os-containers" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># Deve ser executado da raiz de air_twizy_simulation/</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>./utils/run.sh
+</code></pre></div>
+<p>Saída esperada:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>Running without NVIDIA GPU support.
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>[+] Running 2/2
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a> ✔ Container fastdds_server     Started
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a> ✔ Container air_car_container  Started
+</code></pre></div>
+<p>Inicia dois containers:
+- <code>air_car_container</code> — container principal do veículo (ROS2 + SD-VehicleInterface)
+- <code>fastdds_server</code> — FastDDS Discovery Server na porta 11811</p>
+<div class="admonition warning">
+<p class="admonition-title">NÃO usar <code>docker compose up</code> diretamente</p>
+<p>Rodar <code>docker compose up</code> da raiz do repositório falha com <code>no configuration file provided: not found</code>. O compose file fica em <code>docker/docker-compose.yml</code> e requer variáveis de ambiente que só o <code>run.sh</code> configura corretamente. Use sempre <code>./utils/run.sh</code>.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Executar da raiz do repositório, não de dentro de <code>utils/</code></p>
+<p>O <code>run.sh</code> referencia <code>docker/docker-compose.yml</code> relativo ao diretório de trabalho. Se você estiver dentro de <code>utils/</code> ao rodar, a resolução de caminho falha. Sempre <code>cd ~/tmp_mota/air_twizy_simulation</code> primeiro.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Avisos não bloqueantes do run.sh</p>
+<p>Aparecem toda vez e podem ser ignorados:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>xhost: unable to open display &quot;&quot;             ← sem tela via SSH, inofensivo
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>touch: /tmp/.docker.xauth: Permission denied ← mesmo motivo, inofensivo
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>cp: cyclonedds_vehicle.xml.template: No such file or directory ← template ausente, não afeta operação
+</code></pre></div></p>
+</div>
+<hr />
+<h3 id="4-entrar-no-container">4 — Entrar no container<a class="headerlink" href="#4-entrar-no-container" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>./utils/bash_container.sh
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="c1"># Opening bash in the container...</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="c1"># root@twizy:~#</span>
+</code></pre></div>
+<p>Abre um shell bash dentro do <code>air_car_container</code> como root.</p>
+<div class="admonition warning">
+<p class="admonition-title">Executar <code>source</code> antes de qualquer comando <code>ros2</code></p>
+<p>O bash interativo do container <strong>não</strong> faz source do ROS2 automaticamente. É necessário rodar isto toda vez que abrir um novo shell dentro do container:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="nb">source</span><span class="w"> </span>/opt/ros/humble/setup.bash
+</code></pre></div>
+Sem isso, os comandos <code>ros2</code> não serão encontrados e scripts Python que importam <code>rclpy</code> falharão silenciosamente ou com erros de import.</p>
+<p>Os pacotes do workspace (sd_vehicle_interface, ros2_socketcan, etc.) já são carregados pelo entrypoint do container — somente a instalação base do ROS2 precisa deste <code>source</code> manual.</p>
+</div>
+<hr />
+<h3 id="5-launch-da-interface-do-veiculo">5 — Launch da interface do veículo<a class="headerlink" href="#5-launch-da-interface-do-veiculo" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>ros2<span class="w"> </span>launch<span class="w"> </span>sd_vehicle_interface<span class="w"> </span>sd_vehicle_interface.launch.xml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">    </span>sd_vehicle:<span class="o">=</span>twizy<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">    </span>sd_gps_imu:<span class="o">=</span>peak<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="w">    </span>sd_speed_source:<span class="o">=</span>vehicle_can_speed
+</code></pre></div>
+<p>Inicia três nós ROS2:
+- <code>sd_vehicle_interface_node</code> — traduz comandos ROS2 para frames CAN
+- <code>socket_can_receiver_node_exe</code> — lê frames CAN do barramento
+- <code>socket_can_sender_node_exe</code> — escreve frames CAN no barramento</p>
+<p><strong>O launch está funcionando corretamente quando aparecer:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>[socket_can_receiver_node_exe-2] interface: can2
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>[socket_can_receiver_node_exe-2] applied filters: 0:0
+</code></pre></div>
+<p>A linha <code>applied filters: 0:0</code> confirma que o socket CAN está aberto e o XCU está enviando frames. Se essa linha não aparecer em ~2 segundos após o início, a porta CAN errada está selecionada.</p>
+<hr />
+<h3 id="interface-can-qual-porta-usar">Interface CAN — qual porta usar<a class="headerlink" href="#interface-can-qual-porta-usar" title="Permanent link">&para;</a></h3>
+<p>O XCU da StreetDrone está fisicamente conectado em <strong><code>can2</code></strong> neste veículo. O padrão <code>CAN_PORT=can2</code> dentro do container já está correto.</p>
+<table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>O que acontece</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>can2</code></td>
+<td><code>applied filters: 0:0</code> — sem erros</td>
+<td><strong>Correto</strong> — XCU está neste barramento</td>
+</tr>
+<tr>
+<td><code>can0</code></td>
+<td><code>applied filters: 0:0</code> — mas nenhum dado do XCU trafega</td>
+<td>Interface UP mas XCU não está conectado aqui</td>
+</tr>
+<tr>
+<td><code>can1</code></td>
+<td><code>applied filters: 0:0</code> e imediatamente: <code>Error sending: No buffer space available</code> + <code>Error receiving: CAN Receive Timeout</code></td>
+<td>Barramento UP mas nenhum nó responde — buffer enche imediatamente</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title"><code>can0</code> e <code>can1</code> não causam crash imediato</p>
+<p>As duas interfaces iniciam sem erro e mostram <code>applied filters: 0:0</code>. O problema só fica evidente ao tentar enviar um comando — com <code>can1</code> os erros aparecem imediatamente; com <code>can0</code> a interface parece saudável mas o XCU nunca recebe nem envia dados. Sempre verifique se o <code>applied filters: 0:0</code> apareceu <strong>e</strong> que nenhuma linha WARN veio em seguida.</p>
+</div>
+<p>Se por algum motivo o <code>CAN_PORT</code> foi alterado, redefina:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">CAN_PORT</span><span class="o">=</span>can2
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>ros2<span class="w"> </span>launch<span class="w"> </span>sd_vehicle_interface<span class="w"> </span>sd_vehicle_interface.launch.xml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">    </span>sd_vehicle:<span class="o">=</span>twizy<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="w">    </span>sd_gps_imu:<span class="o">=</span>peak<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="w">    </span>sd_speed_source:<span class="o">=</span>vehicle_can_speed
+</code></pre></div>
+<hr />
+<h3 id="variaveis-de-ambiente-dentro-do-container">Variáveis de ambiente dentro do container<a class="headerlink" href="#variaveis-de-ambiente-dentro-do-container" title="Permanent link">&para;</a></h3>
+<p>Execute <code>env</code> dentro do container para verificar o ambiente completo. Valores confirmados em produção:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>ROS_DOMAIN_ID=0
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>ROS_SUPER_CLIENT=true
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>ROS_DISCOVERY_SERVER=twizy:11811
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>ROS_LOCALHOST_ONLY=0
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>CAN_PORT=can2
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>INTERFACE=true
+<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>LIDAR=false
+<a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a>GPU=false
+</code></pre></div>
+<hr />
+<h3 id="6-teleoperacao-por-teclado-alternativa-ao-controle-xbox">6 — Teleoperação por teclado (alternativa ao controle Xbox)<a class="headerlink" href="#6-teleoperacao-por-teclado-alternativa-ao-controle-xbox" title="Permanent link">&para;</a></h3>
+<p>Abra um <strong>segundo terminal</strong> no veículo (nova sessão SSH ou painel <code>tmux</code>) e entre no container novamente:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>./utils/bash_container.sh
+</code></pre></div>
+<p>Dentro do container:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="nb">source</span><span class="w"> </span>/opt/ros/humble/setup.bash
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>python3<span class="w"> </span>utils/direct_control/direct_teleop.py
+</code></pre></div>
+<p>Saída esperada:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>Reading from the keyboard and Publishing to TwistStamped!
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>Uses &quot;w, a, s, d, x&quot; keys
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>---------------------------
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>Move forward:   &#39;w&#39;
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>Move backward:  &#39;s&#39;
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>Turn left:      &#39;a&#39;
+<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a>Turn right:     &#39;d&#39;
+<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a>Stop:           &#39;x&#39;
+<a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a>
+<a id="__codelineno-23-10" name="__codelineno-23-10" href="#__codelineno-23-10"></a>CTRL-C to quit
+<a id="__codelineno-23-11" name="__codelineno-23-11" href="#__codelineno-23-11"></a>
+<a id="__codelineno-23-12" name="__codelineno-23-12" href="#__codelineno-23-12"></a>Torque Setpoint: 0.0, Steering Value: 0.0
+</code></pre></div>
+<p>O script publica <code>sd_msgs/DirectControl</code> em <code>/direct_control_cmd</code> em tempo real.</p>
+<p><strong>Comportamento da direção:</strong>
+- Cada tecla incrementa ou decrementa a direção em <strong>5 unidades</strong>
+- O valor acumula enquanto a tecla é pressionada repetidamente: um pressionar de <code>a</code> → -5, dois → -10, etc.
+- Limite máximo: <strong>-55 a +55</strong> (o script trava neste limite)
+- Soltar a tecla <strong>não</strong> centraliza a direção — é preciso pressionar a direção oposta ou <code>x</code></p>
+<p><strong>Exemplo de valores observados durante um teste:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>Steering Value: -5.0    ← um pressionar de &#39;d&#39;
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>Steering Value: 5.0     ← trocou para &#39;a&#39;
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>Steering Value: 10.0
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>Steering Value: -55.0   ← manteve &#39;a&#39; repetidamente até o limite
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>Steering Value: 0.0     ← voltou ao centro
+</code></pre></div></p>
+<div class="admonition warning">
+<p class="admonition-title">Este terminal deve ser separado do terminal da interface do veículo</p>
+<p>O <code>direct_teleop.py</code> apenas publica comandos. O nó <code>sd_vehicle_interface</code> (passo 5) deve estar rodando no outro terminal para de fato enviar esses comandos via CAN para o XCU.</p>
+</div>
+<hr />
+<h3 id="7-parar-os-containers">7 — Parar os containers<a class="headerlink" href="#7-parar-os-containers" title="Permanent link">&para;</a></h3>
+<p><strong>NÃO use <code>docker compose down</code></strong> — requer as mesmas variáveis de ambiente que o <code>run.sh</code> configura e falhará com avisos de variável não definida se chamado de um shell comum:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>WARN: The &quot;CAN_PORT&quot; variable is not set. Defaulting to a blank string.
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>invalid spec: ::rw: empty section between colons
+</code></pre></div>
+<p>Use <code>docker stop</code> pelo nome do container:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>docker<span class="w"> </span>stop<span class="w"> </span>air_car_container<span class="w"> </span>fastdds_server
+</code></pre></div>
+<p>Verifique que pararam:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>docker<span class="w"> </span>ps<span class="w">   </span><span class="c1"># deve estar vazio</span>
+</code></pre></div>
+<p>Para reiniciar: execute <code>./utils/run.sh</code> novamente da raiz do repositório — ele para os containers existentes e os recria.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Voltar ao topo
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/AIR-UFG" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "Mais 1 nesta p\u00e1gina", "search.result.more.other": "Mais # nesta p\u00e1gina", "search.result.none": "Nenhum resultado encontrado", "search.result.one": "1 resultado encontrado", "search.result.other": "# resultados encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
