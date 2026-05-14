@@ -1,3 +1,6 @@
+# Local env for root docker-compose (copy from env.exemple)
+.env
+
 # Prerequisites
 *.d
 

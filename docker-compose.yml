@@ -1,0 +1,116 @@
+# Docker Compose raiz — air_twizy_hardware (camera + lidar Ouster + carro Twizy)
+#
+# Pré-requisito: submódulos inicializados
+#   git submodule update --init --recursive
+#
+# Variáveis: copie env.exemple para .env na raiz deste repositório e edite.
+#
+# Compilar imagens (usa o Dockerfile de cada submódulo):
+#   docker compose build              # todas
+#   docker compose build camera       # só câmera (Lucid / arena_camera_ros2)
+#   docker compose build lidar        # só lidar (ouster-ros)
+#   docker compose build carro        # só carro (air_twizy_simulation / twizy)
+#
+# Subir serviços (nome do serviço = um só; sem lista = todos):
+#   docker compose up -d camera
+#   docker compose up -d lidar
+#   docker compose up -d carro
+#   docker compose up -d              # camera + lidar + carro
+#
+# Shell interativo (sem -d):
+#   docker compose run --rm camera bash
+#
+# Câmera GigE: costuma exigir xhost + rede host (ver README do camera-lucid).
+
+services:
+  camera:
+    build:
+      context: ./workspace/camera-lucid
+      dockerfile: Dockerfile
+    image: ${CAMERA_IMAGE_NAME:-air-twizy-camera:latest}
+    container_name: ${CAMERA_CONTAINER_NAME:-air_twizy_camera}
+    volumes:
+      - ./workspace/camera-lucid/ros2_ws:/arena_camera_ros2/ros2_ws
+      - ./workspace/camera-lucid/scripts:/arena_camera_ros2/scripts
+      - ./workspace/camera-lucid/launch:/arena_camera_ros2/launch
+      - ./workspace/camera-lucid/config:/arena_camera_ros2/config
+      - ./workspace/camera-lucid/bags:/arena_camera_ros2/bags
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    environment:
+      DISPLAY: ${DISPLAY:-:0}
+      QT_X11_NO_MITSHM: ${QT_X11_NO_MITSHM:-1}
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-42}
+      RMW_IMPLEMENTATION: ${CAMERA_RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
+      FASTRTPS_DEFAULT_PROFILES_FILE: ${CAMERA_FASTRTPS_DEFAULT_PROFILES_FILE:-/arena_camera_ros2/config/fastdds_subscriber.xml}
+      CAMERA_SERIAL: ${CAMERA_SERIAL:-}
+      CAMERA_TOPIC: ${CAMERA_TOPIC:-/camera/image_raw}
+    network_mode: host
+    privileged: true
+    ipc: host
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    command: bash
+
+  lidar:
+    build:
+      context: ./workspace/ouster-ros
+      dockerfile: Dockerfile
+      args:
+        ROS_DISTRO: ${OUSTER_ROS_DISTRO:-humble}
+        RMW_IMPLEMENTATION: ${OUSTER_RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
+    image: ${LIDAR_IMAGE_NAME:-air-twizy-lidar:latest}
+    container_name: ${LIDAR_CONTAINER_NAME:-air_twizy_lidar}
+    # Imagem upstream inicia ros2 launch no ENTRYPOINT; aqui usamos shell para
+    # desenvolvimento. Para rodar o driver na subida, sobrescreva entrypoint/command.
+    working_dir: /var/lib/build
+    entrypoint: ["/bin/bash"]
+    command:
+      - -lc
+      - |
+        source /opt/ros/${OUSTER_ROS_DISTRO:-humble}/setup.bash
+        if [ -f install/setup.bash ]; then source install/setup.bash; fi
+        exec bash
+    environment:
+      DISPLAY: ${DISPLAY:-:0}
+      QT_X11_NO_MITSHM: ${QT_X11_NO_MITSHM:-1}
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-42}
+      RMW_IMPLEMENTATION: ${OUSTER_RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    network_mode: host
+    privileged: true
+    ipc: host
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+  carro:
+    build:
+      context: ./workspace/twizy
+      dockerfile: docker/Dockerfile
+    image: ${CARRO_IMAGE_NAME:-air-twizy-car:latest}
+    container_name: ${CARRO_CONTAINER_NAME:-air_twizy_car}
+    runtime: ${NVIDIA_RUNTIME:-runc}
+    network_mode: host
+    privileged: true
+    tty: true
+    stdin_open: true
+    environment:
+      DISPLAY: ${DISPLAY:-:0}
+      QT_X11_NO_MITSHM: ${QT_X11_NO_MITSHM:-1}
+      XAUTHORITY: ${XAUTHORITY:-/tmp/.docker.xauth}
+      GPU: ${TWIZY_GPU:-false}
+      LIDAR: ${TWIZY_LIDAR:-false}
+      INTERFACE: ${TWIZY_INTERFACE:-true}
+      CAN_PORT: ${TWIZY_CAN_PORT:-can0}
+      NVIDIA_RUNTIME: ${NVIDIA_RUNTIME:-runc}
+    volumes:
+      - ${TWIZY_HOST_FOLDER_PATH:-./workspace/twizy/ros_packages}:/root/ros2_ws/src:rw
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${TWIZY_XAUTHORITY:-/tmp/.docker.xauth}:/tmp/.docker.xauth:rw
+      - ${TWIZY_SHARED_FOLDER:-./workspace/twizy/shared_folder}:/root/shared_folder:rw
+      - ${TWIZY_UTILS_PATH:-./workspace/twizy/utils}:/root/utils:rw
+    entrypoint: ["/root/entrypoint.sh"]
+    restart: unless-stopped
+    command: ["/bin/bash"]

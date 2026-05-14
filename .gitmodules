@@ -1,0 +1,9 @@
+[submodule "workspace/ouster-ros"]
+	path = workspace/ouster-ros
+	url = https://github.com/ouster-lidar/ouster-ros
+[submodule "workspace/camera-lucid"]
+	path = workspace/camera-lucid
+	url = https://github.com/gusTavPeres/lucid_camera_ros2
+[submodule "workspace/twizy"]
+	path = workspace/twizy
+	url = https://github.com/AIR-UFG/air_twizy_simulation
