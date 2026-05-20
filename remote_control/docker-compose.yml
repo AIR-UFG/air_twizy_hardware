@@ -1,0 +1,63 @@
+# docker-compose para controle REMOTO do Twizy real.
+#
+# Diferenças do docker-compose principal (workspace/twizy/docker/docker-compose.yml):
+#   - Adiciona serviço fastdds_server (Discovery Server na porta 11811)
+#   - Configura ROS_DISCOVERY_SERVER no container do carro
+#   - ROS_LOCALHOST_ONLY desligado (necessário para comunicação cross-machine)
+#
+# Pré-requisito: imagem air-twizy-car-image:v1 já construída
+#   cd workspace/twizy && ./utils/run.sh (para build) ou
+#   docker build -t air-twizy-car-image:v1 workspace/twizy/docker/
+#
+# Uso:
+#   cp env.exemple ../.env && editar ../.env
+#   cd remote_control
+#   docker compose up -d
+#
+# No PC do operador (dentro do container da simulação):
+#   export ROS_DISCOVERY_SERVER=<IP_NETBIRD_DO_CARRO>:11811
+#   export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+#   ros2 run joy joy_node --ros-args -p deadzone:=0.15
+#   python3 utils/remote_control/direct_teleop_ps4.py
+#   # ou: python3 utils/remote_control/direct_teleop_gui.py
+
+services:
+  fastdds_server:
+    image: osrf/ros:humble-ros-core
+    container_name: fastdds_server
+    network_mode: host
+    restart: unless-stopped
+    command: fastdds discovery -i 0 -l 0.0.0.0 -p 11811
+
+  carro:
+    image: ${CARRO_IMAGE_NAME:-air-twizy-car-image:v1}
+    container_name: ${CARRO_CONTAINER_NAME:-air_twizy_car_remote}
+    network_mode: host
+    privileged: true
+    tty: true
+    stdin_open: true
+    depends_on:
+      - fastdds_server
+    environment:
+      DISPLAY: ${DISPLAY:-:0}
+      QT_X11_NO_MITSHM: ${QT_X11_NO_MITSHM:-1}
+      XAUTHORITY: ${TWIZY_XAUTHORITY:-/tmp/.docker.xauth}
+      GPU: ${TWIZY_GPU:-false}
+      LIDAR: ${TWIZY_LIDAR:-false}
+      INTERFACE: ${TWIZY_INTERFACE:-true}
+      CAN_PORT: ${TWIZY_CAN_PORT:-can0}
+      NVIDIA_RUNTIME: ${NVIDIA_RUNTIME:-runc}
+      # FastDDS Discovery Server — permite que o operador remoto encontre este nó
+      RMW_IMPLEMENTATION: rmw_fastrtps_cpp
+      ROS_DISCOVERY_SERVER: localhost:11811
+      ROS_LOCALHOST_ONLY: "0"
+    volumes:
+      - ${TWIZY_HOST_FOLDER_PATH:-../workspace/twizy/ros_packages}:/root/ros2_ws/src:rw
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${TWIZY_XAUTHORITY:-/tmp/.docker.xauth}:/tmp/.docker.xauth:rw
+      - ${TWIZY_SHARED_FOLDER:-../workspace/twizy/shared_folder}:/root/shared_folder:rw
+      - ${TWIZY_UTILS_PATH:-../workspace/twizy/utils}:/root/utils:rw
+    runtime: ${NVIDIA_RUNTIME:-runc}
+    entrypoint: ["/root/entrypoint.sh"]
+    restart: unless-stopped
+    command: ["/bin/bash"]
