@@ -12,7 +12,7 @@ def generate_launch_description():
         ),
         Node(
             package='sd_control',
-            executable='sd_teleop_ps4',
+            executable='sd_teleop_ps4.py',
             name='sd_teleop_ps4',
             output='screen'
         ),
