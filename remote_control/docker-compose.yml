@@ -23,7 +23,7 @@
 
 services:
   fastdds_server:
-    image: osrf/ros:humble-ros-core
+    image: ${CARRO_IMAGE_NAME:-air-twizy-car-image:v1}
     container_name: fastdds_server
     network_mode: host
     restart: unless-stopped
