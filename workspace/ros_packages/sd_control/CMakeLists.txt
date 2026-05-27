@@ -11,6 +11,7 @@ install(DIRECTORY launch/
 install(PROGRAMS
   src/sd_teleop_ps4.py
   src/sd_teleop_gui.py
+  src/sd_teleop_ps4_direct.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
