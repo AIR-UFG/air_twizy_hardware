@@ -23,10 +23,22 @@
 # Câmera GigE: costuma exigir xhost + rede host (ver README do camera-lucid).
 
 services:
+  discovery-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    container_name: discovery_server
+    network_mode: "host" # Mandatory to see Netbird IP
+    command: >
+      -i 0
+    restart: unless-stopped
+
   camera:
     build:
       context: ./workspace/camera-lucid
       dockerfile: Dockerfile
+    depends_on:
+      - discovery-server
     image: ${CAMERA_IMAGE_NAME:-air-twizy-camera:latest}
     container_name: ${CAMERA_CONTAINER_NAME:-air_twizy_camera}
     volumes:
@@ -52,65 +64,109 @@ services:
     restart: unless-stopped
     command: bash
 
-  lidar:
+  ouster_lidar:
     build:
-      context: ./workspace/ouster-ros
+      context: .
       dockerfile: Dockerfile
       args:
-        ROS_DISTRO: ${OUSTER_ROS_DISTRO:-humble}
-        RMW_IMPLEMENTATION: ${OUSTER_RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
-    image: ${LIDAR_IMAGE_NAME:-air-twizy-lidar:latest}
-    container_name: ${LIDAR_CONTAINER_NAME:-air_twizy_lidar}
-    # Imagem upstream inicia ros2 launch no ENTRYPOINT; aqui usamos shell para
-    # desenvolvimento. Para rodar o driver na subida, sobrescreva entrypoint/command.
-    working_dir: /var/lib/build
-    entrypoint: ["/bin/bash"]
-    command:
-      - -lc
-      - |
-        source /opt/ros/${OUSTER_ROS_DISTRO:-humble}/setup.bash
-        if [ -f install/setup.bash ]; then source install/setup.bash; fi
-        exec bash
+        ROS_DISTRO: ${ROS_DISTRO:-humble}
+        RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
+    image: ouster-ros:${ROS_DISTRO:-humble}
+    depends_on:
+      - discovery-server
+    container_name: ouster_lidar
     environment:
-      DISPLAY: ${DISPLAY:-:0}
-      QT_X11_NO_MITSHM: ${QT_X11_NO_MITSHM:-1}
-      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-42}
-      RMW_IMPLEMENTATION: ${OUSTER_RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
+      # DDS — mesmo valor no host se for usar rviz2/tópicos fora do container
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}
+      # RMW (deve bater com a imagem buildada)
+      - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
+      # X11 / Wayland (RViz no container)
+      - DISPLAY=${DISPLAY:-:0}
+      - QT_X11_NO_MITSHM=${QT_X11_NO_MITSHM:-1}
+      - ROS_DISCOVERY_SERVER=${ROS_DISCOVERY_SERVER:-twizy:11811}
+      - ROS_SUPER_CLIENT=${ROS_SUPER_CLIENT:-true}
     volumes:
+      # Socket X11 — permissões: usuário no container é UID 1000 (build); alinhe ao seu usuário host ou use xhost
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      # Entrypoint editável no host (faz o source do ROS + overlay do workspace)
+      - ./entrypoint_ouster.sh:/var/lib/build/entrypoint.sh:ro
+      # Não monte volume anónimo em ~/.ros: vem como root e o user `build` (1000) não escreve em .ros/log.
+      # Logs/metadata do ROS ficam na camada gravável do container (ok para uso normal).
+      # Para persistir no host: mkdir -p ./ouster_ros_home && sudo chown -R 1000:1000 ./ouster_ros_home
+      # e descomente:
+      # - ./ouster_ros_home:/var/lib/build/.ros
+      # Opcional: bag/gravações no host (descomente e crie a pasta)
+      # - ./bags:/var/lib/build/bags
+    # Obrigatório para UDP do LiDAR e HTTP para a API do sensor (mesma visão de rede que o host)
     network_mode: host
     privileged: true
+    # Melhora DDS / memória compartilhada entre processos ROS 2
     ipc: host
+    # Aumenta /dev/shm — ajuda publishers grandes (pointcloud)
+    shm_size: "1gb"
     stdin_open: true
     tty: true
+    env_file:
+      - .env
+    # Entrypoint editável (montado em /var/lib/build/entrypoint.sh) faz o source
+    # do ROS 2 + overlay do workspace antes de executar o `command` abaixo.
+    entrypoint: ["bash", "/var/lib/build/entrypoint.sh"]
+    command:
+      - ros2
+      - launch
+      - ouster_ros
+      - sensor.launch.xml
+      # Defina SENSOR_HOSTNAME em `.env` (veja .env.example) ou exporte no shell
+      - sensor_hostname:=${SENSOR_HOSTNAME:-192.168.1.200}
+      - viz:=${VIZ:-false}
     restart: unless-stopped
 
   carro:
     build:
       context: ./workspace/twizy
       dockerfile: docker/Dockerfile
-    image: ${CARRO_IMAGE_NAME:-air-twizy-car:latest}
-    container_name: ${CARRO_CONTAINER_NAME:-air_twizy_car}
-    runtime: ${NVIDIA_RUNTIME:-runc}
+    image: ${CARRO_IMAGE_NAME:-air-twizy-car-image:v1}
+    depends_on:
+      - discovery-server
+    container_name: ${CARRO_CONTAINER_NAME:-air_car_container}
     network_mode: host
     privileged: true
     tty: true
     stdin_open: true
+    env_file:
+      - .env
     environment:
+      # X11 / GUI (RViz, Gazebo)
       DISPLAY: ${DISPLAY:-:0}
       QT_X11_NO_MITSHM: ${QT_X11_NO_MITSHM:-1}
       XAUTHORITY: ${XAUTHORITY:-/tmp/.docker.xauth}
+      # Flags do stack Twizy (run.sh / launches)
       GPU: ${TWIZY_GPU:-false}
       LIDAR: ${TWIZY_LIDAR:-false}
       INTERFACE: ${TWIZY_INTERFACE:-true}
       CAN_PORT: ${TWIZY_CAN_PORT:-can0}
+      RVIZ: ${TWIZY_RVIZ:-false}
       NVIDIA_RUNTIME: ${NVIDIA_RUNTIME:-runc}
+      # ROS 2 / Fast DDS (discovery server na mesma máquina)
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
+      ROS_DISCOVERY_SERVER: ${ROS_DISCOVERY_SERVER:-twizy:11811}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
     volumes:
-      - ${TWIZY_HOST_FOLDER_PATH:-./workspace/twizy/ros_packages}:/root/ros2_ws/src:rw
+      - ${TWIZY_HOST_FOLDER_PATH:-./workspace/twizy/ros_packages}:${CONTAINER_FOLDER_PATH:-/root/ros2_ws/src/}:rw
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
-      - ${TWIZY_XAUTHORITY:-/tmp/.docker.xauth}:/tmp/.docker.xauth:rw
+      - ${XAUTHORITY:-/tmp/.docker.xauth}:/tmp/.docker.xauth:rw
       - ${TWIZY_SHARED_FOLDER:-./workspace/twizy/shared_folder}:/root/shared_folder:rw
       - ${TWIZY_UTILS_PATH:-./workspace/twizy/utils}:/root/utils:rw
-    entrypoint: ["/root/entrypoint.sh"]
+      # Entrypoint editável no host (faz o source do ROS + overlay do workspace)
+      - ./entrypoint_twizy.sh:/root/entrypoint_twizy.sh:ro
+    runtime: ${NVIDIA_RUNTIME:-runc}
+    entrypoint: ["bash", "/root/entrypoint_twizy.sh"]
     restart: unless-stopped
-    command: ["/bin/bash"]
+    command:
+      - ros2
+      - launch
+      - sd_vehicle_interface
+      - sd_vehicle_interface.launch.xml
+      - sd_vehicle:=twizy
+      - sd_gps_imu:=peak
+      - sd_speed_source:=vehicle_can_speed
