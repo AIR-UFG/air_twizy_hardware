@@ -1,7 +1,7 @@
 #!/bin/bash
-# Entrypoint editável (montado em /root/entrypoint_twizy.sh) para o serviço `carro`.
-# Faz o source do ROS 2 e do overlay do ros2_ws antes de executar o `command`
-# definido no docker-compose.yml (ex.: ros2 launch ...).
+# Host-editable entrypoint (mounted at /root/entrypoint_twizy.sh) for the `car` service.
+# Sources ROS 2 and the ros2_ws overlay before running the `command`
+# from docker-compose.yml (e.g. ros2 launch ...).
 set -e
 
 source "/opt/ros/${ROS_DISTRO:-humble}/setup.bash"
