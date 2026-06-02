@@ -5,9 +5,6 @@
 set -e
 
 source "/opt/ros/${ROS_DISTRO:-humble}/setup.bash"
-
-if [ -f /root/ros2_ws/install/setup.bash ]; then
-    source /root/ros2_ws/install/setup.bash
-fi
+source /root/ros2_ws/install/setup.bash
 
 exec "$@"
