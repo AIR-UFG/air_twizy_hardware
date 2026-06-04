@@ -1,0 +1,22 @@
+# Cliente de teleoperação — roda no PC do operador.
+# Conecta no discovery server do carro (twizy:11811) via Netbird e
+# serve o dashboard web em http://localhost:5000.
+FROM ros:humble-ros-base
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-humble-rosidl-default-generators \
+    python3-flask \
+    python3-pil \
+    && rm -rf /var/lib/apt/lists/*
+
+# Compila sd_msgs (fornece a mensagem DirectControl usada no controle)
+WORKDIR /root/ros2_ws
+COPY workspace/twizy/ros_packages/vehicle_interface_packages/SD-VehicleInterface/sd_msgs src/sd_msgs
+RUN . /opt/ros/humble/setup.sh && colcon build --packages-select sd_msgs
+
+COPY dashboard.py /root/dashboard.py
+COPY entrypoint_client.sh /root/entrypoint_client.sh
+RUN chmod +x /root/entrypoint_client.sh
+
+ENTRYPOINT ["/root/entrypoint_client.sh"]
+CMD ["python3", "/root/dashboard.py"]

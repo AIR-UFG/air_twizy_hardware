@@ -155,3 +155,31 @@ services:
       - sd_vehicle:=twizy
       - sd_gps_imu:=peak
       - sd_speed_source:=vehicle_can_speed
+
+  # Dashboard web de teleoperação — roda no PC do OPERADOR.
+  # Cliente do discovery server do carro (twizy:11811) via Netbird.
+  # Subir só este serviço:  docker compose up dashboard
+  # Acesso:                 http://localhost:5000
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    image: air-twizy-dashboard:latest
+    container_name: air_twizy_dashboard
+    depends_on:
+      - discovery-server
+    network_mode: host # Mandatory to route traffic via Netbird interface
+    environment:
+      # Aponta para o discovery server do carro (IP Netbird "twizy")
+      ROS_DISCOVERY_SERVER: ${ROS_DISCOVERY_SERVER:-twizy:11811}
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
+      ROS_SUPER_CLIENT: ${ROS_SUPER_CLIENT:-true}
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
+    volumes:
+      # dashboard.py editável sem rebuild
+      - ./dashboard.py:/root/dashboard.py:ro
+    # Câmeras default: /camera_1/image_raw e /camera_2/image_raw.
+    # Verifique os nomes reais com: ros2 topic list | grep camera
+    # e sobreponha aqui se necessário, ex:
+    # command: ["python3", "/root/dashboard.py", "--cam1", "/camera_1/image_raw", "--cam2", "/camera_2/image_raw"]
+    restart: unless-stopped
