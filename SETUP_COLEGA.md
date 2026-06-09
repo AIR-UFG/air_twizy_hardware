@@ -55,7 +55,8 @@ docker run --rm hello-world
 ### 1.2 Baixar o projeto do dashboard
 
 ```bash
-git clone --recursive <URL_DESTE_PROJETO> twizy
+git clone --recursive -b feat/dashboard \
+    https://github.com/AIR-UFG/air_twizy_hardware twizy
 cd twizy
 ```
 
@@ -202,7 +203,8 @@ zerado.
 **Setup (uma vez):**
 
 ```bash
-git clone --recursive <URL> twizy && cd twizy
+git clone --recursive -b feat/dashboard \
+    https://github.com/AIR-UFG/air_twizy_hardware twizy && cd twizy
 cp env.exemple .env
 docker compose build dashboard
 ```
