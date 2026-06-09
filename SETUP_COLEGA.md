@@ -13,14 +13,14 @@ A interface é a mesma nos dois modos. Só muda **onde** ela busca o ROS.
 
 ## 1. Pré-requisitos (instalar uma vez)
 
-| O quê | Para quê | Modo A | Modo B |
-|---|---|:---:|:---:|
-| Linux (Ubuntu 22.04 recomendado) | Base de tudo | ✅ | ✅ |
-| Docker Engine + plugin Compose | Roda tudo em container | ✅ | ✅ |
-| git | Baixar o código | ✅ | ✅ |
-| Navegador (Chrome/Firefox) | Abrir o dashboard | ✅ | ✅ |
-| Sessão gráfica (X11) | Ver a janela do Gazebo | ✅ | — |
-| Cliente Netbird + acesso à rede do time | Achar o carro (`twizy`) | — | ✅ |
+| O quê                                   | Para quê                | Modo A | Modo B |
+| --------------------------------------- | ----------------------- |:------:|:------:|
+| Linux (Ubuntu 22.04 recomendado)        | Base de tudo            | ✅      | ✅      |
+| Docker Engine + plugin Compose          | Roda tudo em container  | ✅      | ✅      |
+| git                                     | Baixar o código         | ✅      | ✅      |
+| Navegador (Chrome/Firefox)              | Abrir o dashboard       | ✅      | ✅      |
+| Sessão gráfica (X11)                    | Ver a janela do Gazebo  | ✅      | —      |
+| Cliente Netbird + acesso à rede do time | Achar o carro (`twizy`) | —      | ✅      |
 
 > Você **não** precisa instalar ROS, Python, Flask nem nada disso no PC. Tudo
 > roda dentro do Docker.
@@ -119,11 +119,14 @@ simulado pelo teclado (controles na seção 4).
 
 > **Câmeras:** dependem do que a simulação publica. Se aparecer "NO SIGNAL",
 > liste os tópicos e ajuste:
+> 
 > ```bash
 > docker run --rm --network host air-twizy-dashboard:latest \
 >     bash -lc "source /opt/ros/humble/setup.bash; ros2 topic list | grep -i image"
 > ```
+> 
 > Depois rode o dashboard apontando para o tópico certo, ex.:
+> 
 > ```bash
 > docker run --rm --network host -v "$PWD/dashboard.py:/root/dashboard.py:ro" \
 >     air-twizy-dashboard:latest \
@@ -168,13 +171,13 @@ Netbird.
 
 ## 4. Controles (teclado, com a aba do navegador em foco)
 
-| Tecla | Ação |
-|---|---|
-| W / S | Acelerar / frear |
-| A / D | Virar esquerda / direita |
+| Tecla  | Ação                            |
+| ------ | ------------------------------- |
+| W / S  | Acelerar / frear                |
+| A / D  | Virar esquerda / direita        |
 | Espaço | Freio de emergência (zera tudo) |
-| I / O | Torque máximo ±10 |
-| K / L | Steer máximo ±5 |
+| I / O  | Torque máximo ±10               |
+| K / L  | Steer máximo ±5                 |
 
 Segurança: soltou a tecla → torque volta a zero; perdeu o foco da aba → tudo é
 zerado.
@@ -183,20 +186,21 @@ zerado.
 
 ## 5. Problemas comuns
 
-| Sintoma | Causa provável |
-|---|---|
-| `docker: permission denied` | Faltou relogar após `usermod -aG docker` |
+| Sintoma                               | Causa provável                                                      |
+| ------------------------------------- | ------------------------------------------------------------------- |
+| `docker: permission denied`           | Faltou relogar após `usermod -aG docker`                            |
 | Dashboard abre mas nada se move (sim) | Não apertou **play** no Gazebo, ou a sim subiu sem `INTERFACE=true` |
-| Dashboard não acha o carro (modo B) | Netbird caiu (`ping twizy`) ou stack do carro não está no ar |
-| Câmeras "NO SIGNAL" | Tópico de imagem com outro nome — veja a nota da seção 2.2 |
-| Controle não responde | Aba do navegador sem foco — clique na página |
-| Porta 5000 ocupada | Já tem outro dashboard rodando; feche-o antes |
+| Dashboard não acha o carro (modo B)   | Netbird caiu (`ping twizy`) ou stack do carro não está no ar        |
+| Câmeras "NO SIGNAL"                   | Tópico de imagem com outro nome — veja a nota da seção 2.2          |
+| Controle não responde                 | Aba do navegador sem foco — clique na página                        |
+| Porta 5000 ocupada                    | Já tem outro dashboard rodando; feche-o antes                       |
 
 ---
 
 ## 6. Resumo de comandos
 
 **Setup (uma vez):**
+
 ```bash
 git clone --recursive <URL> twizy && cd twizy
 cp env.exemple .env
@@ -204,6 +208,7 @@ docker compose build dashboard
 ```
 
 **Modo A (simulação):**
+
 ```bash
 # terminal 1
 cd workspace/twizy && ./utils/build_docker.sh && ./utils/run.sh GPU=false
@@ -213,6 +218,7 @@ docker run --rm --network host -v "$PWD/dashboard.py:/root/dashboard.py:ro" \
 ```
 
 **Modo B (carro real):**
+
 ```bash
 ping twizy            # Netbird ativa
 docker compose up dashboard
