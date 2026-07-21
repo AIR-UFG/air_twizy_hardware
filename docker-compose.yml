@@ -178,8 +178,15 @@ services:
     volumes:
       # dashboard.py editável sem rebuild
       - ./dashboard.py:/root/dashboard.py:ro
-    # Câmeras default: /camera_1/image_raw e /camera_2/image_raw.
-    # Verifique os nomes reais com: ros2 topic list | grep camera
-    # e sobreponha aqui se necessário, ex:
-    # command: ["python3", "/root/dashboard.py", "--cam1", "/camera_1/image_raw", "--cam2", "/camera_2/image_raw"]
+    # Tópicos comprimidos publicados pelos relays do carro (ver pasta relays/).
+    # Confira os nomes reais com: ros2 topic list | grep camera
+    command:
+      - python3
+      - /root/dashboard.py
+      - --cam1
+      - /camera/top_left/image_raw/compressed
+      - --cam2
+      - /camera/top_front/image_raw/compressed
+      - --cam3
+      - /camera/top_right/image_raw/compressed
     restart: unless-stopped

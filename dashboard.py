@@ -43,6 +43,7 @@ try:
     from rclpy.executors import MultiThreadedExecutor
     from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
     from sensor_msgs.msg import CompressedImage, Image as RosImage
+    from std_msgs.msg import Float32MultiArray
     ROS_AVAILABLE = True
 except ImportError:
     ROS_AVAILABLE = False
@@ -65,6 +66,19 @@ STEER_RATE   = 150.0
 STEER_RETURN = 120.0
 DEFAULT_MAX_TORQUE = 30.0
 DEFAULT_MAX_STEER  = 100.0
+
+# LiDAR top-down: tópico pequeno vindo do relay do carro (Float32MultiArray [x,y,...])
+LIDAR_TOPIC = '/lidar/topdown'
+LIDAR_MAX_R = 20.0   # m: raio que mapeia para a borda do canvas (deve bater com o relay)
+
+# LiDAR panoramas (imagens 360° comprimidas pelo relay do carro) — abas do TOP VIEW
+LIDAR_IMG_TOPICS = {
+    'range':  '/ouster/range_image/compressed',
+    'signal': '/ouster/signal_image/compressed',
+    'nearir': '/ouster/nearir_image/compressed',
+    'reflec': '/ouster/reflec_image/compressed',
+}
+_lidar_img_frames: dict[str, bytes | None] = {k: None for k in LIDAR_IMG_TOPICS}
 
 # tópicos de câmera por slot (None = offline/placeholder)
 # hardware: câmeras Lucid Vision publicam sensor_msgs/Image em /camera_N/image_raw
@@ -90,6 +104,7 @@ _state = {
         'CAM 1': True, 'CAM 2': False, 'CAM 3': True, 'CAM 4': True, 'RADAR': True,
     },
     'logs': [],
+    'lidar': [],   # pontos top-down [[x,y],...] em metros, relativos ao carro
 }
 _lock = threading.Lock()
 _ros_node = None
@@ -158,6 +173,39 @@ class CameraNode(Node):  # type: ignore[misc]
             pass
 
 
+class LidarNode(Node):  # type: ignore[misc]
+    def __init__(self, topic: str):
+        super().__init__('teleop_lidar')
+        qos = QoSProfile(
+            depth=1,
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            durability=DurabilityPolicy.VOLATILE,
+        )
+        self.create_subscription(Float32MultiArray, topic, self._cb, qos)
+        _add_log('INFO', f'LIDAR: assinando {topic}')
+
+    def _cb(self, msg: Float32MultiArray):
+        d = msg.data
+        pts = [[round(d[i], 2), round(d[i + 1], 2)] for i in range(0, len(d) - 1, 2)]
+        with _lock:
+            _state['lidar'] = pts
+            _state['sensors']['LIDAR'] = True
+
+
+class LidarImgNode(Node):  # type: ignore[misc]
+    def __init__(self, name: str, topic: str):
+        super().__init__(f'teleop_lidarimg_{name}')
+        self._name = name
+        qos = QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT,
+                         durability=DurabilityPolicy.VOLATILE)
+        self.create_subscription(CompressedImage, topic, self._cb, qos)
+        _add_log('INFO', f'LIDAR IMG {name}: assinando {topic}')
+
+    def _cb(self, msg: CompressedImage):
+        with _cam_lock:
+            _lidar_img_frames[self._name] = bytes(msg.data)
+
+
 def _ros_thread():
     global _ros_node
     rclpy.init()
@@ -171,6 +219,10 @@ def _ros_thread():
     executor.add_node(_ros_node)
     for n in cam_nodes:
         executor.add_node(n)
+    if LIDAR_TOPIC:
+        executor.add_node(LidarNode(LIDAR_TOPIC))
+    for _n, _t in LIDAR_IMG_TOPICS.items():
+        executor.add_node(LidarImgNode(_n, _t))
     executor.spin()
 
 # ── loops de background ───────────────────────────────────────────────────────
@@ -187,7 +239,7 @@ def _control_loop():
             ms = _state['max_steer']
 
             if emergency:
-                _state['torque'] = 0.0
+                _state['torque'] = -mt   # freio: torque negativo máximo (SDControl: -100 = freio máx)
                 _state['steer'] *= 0.8
             else:
                 torque = _state['torque']
@@ -247,7 +299,8 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return render_template_string(HTML)
+    return Response(render_template_string(HTML),
+                    headers={'Cache-Control': 'no-store, no-cache, must-revalidate'})
 
 @app.route('/control', methods=['POST'])
 def control():
@@ -268,7 +321,7 @@ def control():
             active = bool(data.get('active', False))
             _state['emergency'] = active
             if active:
-                _state['torque'] = 0.0
+                _state['torque'] = -_state['max_torque']   # freio: torque negativo (não coast)
                 _state['steer']  = 0.0
             _add_log('WARN' if active else 'INFO',
                      'FREIO DE EMERGÊNCIA ATIVADO' if active else 'Freio de emergência liberado')
@@ -297,6 +350,8 @@ def stream():
                     'latency_ms':  _state['latency_ms'],
                     'connected':   _state['connected'],
                     'sensors':     dict(_state['sensors']),
+                    'lidar':       _state['lidar'],
+                    'lidar_max_r': LIDAR_MAX_R,
                     'new_logs':    _state['logs'][last_log_idx:],
                 }
                 last_log_idx = len(_state['logs'])
@@ -331,6 +386,16 @@ def cam_stream(cam_id):
             time.sleep(0.04)
     return Response(generate(),
                     mimetype='multipart/x-mixed-replace; boundary=frame',
+                    headers={'Cache-Control': 'no-cache'})
+
+@app.route('/lidarimg/<name>.jpg')
+def lidarimg_jpg(name):
+    global _NO_SIG
+    if _NO_SIG is None:
+        _NO_SIG = _no_signal_jpeg()
+    with _cam_lock:
+        frame = _lidar_img_frames.get(name)
+    return Response(frame if frame else _NO_SIG, mimetype='image/jpeg',
                     headers={'Cache-Control': 'no-cache'})
 
 # ── HTML ──────────────────────────────────────────────────────────────────────
@@ -503,7 +568,16 @@ HTML = r"""<!DOCTYPE html>
   .topview-title { font-size: 11px; font-weight: 700; color: var(--dim); text-transform: uppercase; }
   .legend-item   { display: flex; align-items: center; gap: 4px; font-size: 10px; }
   .legend-dot    { width: 8px; height: 8px; border-radius: 50%; }
-  #radarCanvas   { flex: 1; width: 100%; display: block; }
+  .topview-body  { flex: 1; position: relative; overflow: hidden; min-height: 0; }
+  #radarCanvas   { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  #lidarPano     { position: absolute; inset: 0; width: 100%; height: 100%;
+                   object-fit: fill; background: var(--bg); display: none;
+                   image-rendering: pixelated; }
+  .lidar-tab     { padding: 2px 7px; border-radius: 4px; border: 1px solid #33334a;
+                   background: transparent; color: var(--dim); font-family: inherit;
+                   font-size: 10px; font-weight: 700; cursor: pointer; }
+  .lidar-tab:hover  { border-color: var(--cyan); color: var(--cyan); }
+  .lidar-tab.active { color: var(--cyan); border-color: var(--cyan); background: #16263a; }
 
   /* ── logs ── */
   .logs-panel {
@@ -675,14 +749,19 @@ HTML = r"""<!DOCTYPE html>
           <div class="cam-signal" id="sig-cam4" style="z-index:2"></div>
         </div>
 
-        <!-- Top View -->
+        <!-- Top View / LiDAR (abas) -->
         <div class="topview-wrap">
           <div class="topview-header">
-            <span class="topview-title">Top View</span>
-            <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div><span>LIDAR</span></div>
-            <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div><span>RADAR</span></div>
+            <button class="lidar-tab active" data-tab="cloud"  onclick="setLidarTab('cloud')">Nuvem</button>
+            <button class="lidar-tab"        data-tab="range"  onclick="setLidarTab('range')">Range</button>
+            <button class="lidar-tab"        data-tab="signal" onclick="setLidarTab('signal')">Signal</button>
+            <button class="lidar-tab"        data-tab="nearir" onclick="setLidarTab('nearir')">Near-IR</button>
+            <button class="lidar-tab"        data-tab="reflec" onclick="setLidarTab('reflec')">Reflec</button>
           </div>
-          <canvas id="radarCanvas"></canvas>
+          <div class="topview-body">
+            <canvas id="radarCanvas"></canvas>
+            <img id="lidarPano" alt="">
+          </div>
         </div>
       </div>
 
@@ -708,28 +787,43 @@ const heldKeys   = new Set();
 let   emergency  = false;
 let   adjustCool = {};
 let   allLogs    = [];
-let   mockPoints = [];
 
 // ── radar canvas ──────────────────────────────────────────────────────────────
 const canvas = document.getElementById('radarCanvas');
 const ctx    = canvas.getContext('2d');
+let   lidarPts  = [];    // [[x,y],...] em metros (x=frente, y=esquerda)
+let   lidarMaxR = 20.0;  // metros no anel externo
 
 function resizeCanvas() {
   const rect = canvas.parentElement.getBoundingClientRect();
   canvas.width  = rect.width;
-  canvas.height = rect.height - 32;
+  canvas.height = rect.height;
 }
 
-function spawnMockPoints() {
-  mockPoints = [];
-  for (let i = 0; i < 12; i++) {
-    const a = Math.random() * Math.PI * 2;
-    const r = 0.25 + Math.random() * 0.65;
-    mockPoints.push({ a, r, type: Math.random() > 0.3 ? 'lidar' : 'radar' });
+let lidarTab = 'cloud';
+let lidarTimer = null;
+function refreshPano() {
+  if (lidarTab === 'cloud') return;
+  document.getElementById('lidarPano').src = '/lidarimg/' + lidarTab + '.jpg?t=' + Date.now();
+}
+function setLidarTab(name) {
+  lidarTab = name;
+  document.querySelectorAll('.lidar-tab').forEach(b =>
+    b.classList.toggle('active', b.dataset.tab === name));
+  const cv = document.getElementById('radarCanvas');
+  const im = document.getElementById('lidarPano');
+  if (lidarTimer) { clearInterval(lidarTimer); lidarTimer = null; }
+  if (name === 'cloud') {
+    cv.style.display = 'block';
+    im.style.display = 'none';
+    im.src = '';
+  } else {
+    cv.style.display = 'none';
+    im.style.display = 'block';
+    refreshPano();
+    lidarTimer = setInterval(refreshPano, 1000);   // JPEG único a cada 1s (sem MJPEG persistente)
   }
 }
-spawnMockPoints();
-setInterval(spawnMockPoints, 4000);
 
 function drawRadar() {
   resizeCanvas();
@@ -750,28 +844,14 @@ function drawRadar() {
     ctx.stroke();
   }
 
-  for (const p of mockPoints) {
-    const px = cx + Math.cos(p.a) * p.r * maxR;
-    const py = cy + Math.sin(p.a) * p.r * maxR;
-    const color = p.type === 'lidar' ? '#ff3344' : '#4488ff';
-    ctx.beginPath();
-    ctx.arc(px, py, 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(px, py, 5, 0, Math.PI * 2);
-    ctx.fillStyle = p.type === 'lidar' ? 'rgba(255,51,68,0.2)' : 'rgba(68,136,255,0.2)';
-    ctx.fill();
+  // pontos do LiDAR (top-down): x=frente->cima, y=esquerda->esquerda
+  const scale = maxR / lidarMaxR;
+  ctx.fillStyle = 'rgba(255,51,68,0.85)';
+  for (let i = 0; i < lidarPts.length; i++) {
+    const px = cx - lidarPts[i][1] * scale;
+    const py = cy - lidarPts[i][0] * scale;
+    ctx.fillRect(px - 1, py - 1, 2, 2);
   }
-
-  const carW = 14, carH = 22;
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.fillStyle = '#888899';
-  ctx.fillRect(-carW/2, -carH/2, carW, carH);
-  ctx.fillStyle = 'rgba(0,212,255,0.5)';
-  ctx.fillRect(-carW/2, -carH/2, carW, 5);
-  ctx.restore();
 
   ctx.beginPath();
   ctx.arc(cx, cy, 3, 0, Math.PI * 2);
@@ -838,6 +918,9 @@ sse.onmessage = e => {
     overlay.classList.remove('active');
   }
 
+  if (d.lidar) lidarPts = d.lidar;
+  if (d.lidar_max_r) lidarMaxR = d.lidar_max_r;
+
   if (d.new_logs && d.new_logs.length) {
     d.new_logs.forEach(appendLog);
   }
@@ -898,11 +981,16 @@ function escHtml(s) {
 const CONTROL_KEYS = new Set(['w','s','a','d']);
 const ADJUST_KEYS  = new Set(['i','o','k','l']);
 
+const CONTROL_SEND_MS = 150;   // throttle do envio de controle (era 100 = 10Hz)
+let   _lastHeldSig = '';
 function sendKeys() {
+  const sig = [...heldKeys].sort().join(',');
+  if (heldKeys.size === 0 && sig === _lastHeldSig) return;  // parado: não floodar o servidor
+  _lastHeldSig = sig;
   post('/control', { action: 'keys', held: [...heldKeys] });
 }
 
-setInterval(sendKeys, 100);
+setInterval(sendKeys, CONTROL_SEND_MS);
 
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT') return;
@@ -975,7 +1063,11 @@ if __name__ == '__main__':
                         help='Tópico Image para CAM 3 (opcional)')
     parser.add_argument('--cam4', default=None, metavar='TOPIC',
                         help='Tópico Image para CAM 4 (opcional)')
+    parser.add_argument('--lidar', default=LIDAR_TOPIC, metavar='TOPIC',
+                        help=f'Tópico Float32MultiArray top-down do LiDAR (padrão: {LIDAR_TOPIC})')
     args = parser.parse_args()
+
+    LIDAR_TOPIC = args.lidar
 
     for slot, val in [(1, args.cam1), (2, args.cam2), (3, args.cam3), (4, args.cam4)]:
         if val:
